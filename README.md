@@ -1,6 +1,11 @@
 ### A resp storing my solution
 - [x] Chapter1 (Apr 6)
 - [x] Chapter2 (Apr 7)
-- [ ] Chapter3
-- [ ] Chapter4
-- [ ] Chapter5
+- [x] Chapter3 (Apr 8)
+- [x] Chapter4 (Apr 9)
+- [ ] Chapter5 
+- [ ] Chapter6
+- [ ] Chapter7
+- [ ] Chapter8
+- [ ] Chapter9
+- [ ] Chapter10
