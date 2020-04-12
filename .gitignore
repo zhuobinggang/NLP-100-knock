@@ -2,4 +2,5 @@ test.txt
 __pycache__
 .DS_Store
 *\.output
+*\.input
 *\.png
