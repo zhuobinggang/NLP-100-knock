@@ -128,8 +128,71 @@ def q58():
         if nsubj.find('governor').text == dobj.find('governor').text:
           print(Template('$syugo\t$juchugo\t$mokutekigo').substitute(juchugo=nsubj.find('governor').text, syugo=nsubj.find('dependent').text, mokutekigo=dobj.find('dependent').text))
 
-# def q59():
-  
+class Tree:
+  def __init__(self, name, is_terminal=False, val='', trees=[], rest=''):
+    self.name = name
+    self.is_terminal = is_terminal
+    self.val = val
+    self.trees = trees
+    self.rest = rest
+  def get_val(self):
+    if self.is_terminal:
+      return self.val
+    else:
+      return ' '.join(map(lambda x: x.get_val(), self.trees))
+  def __str__(self):
+    return self.name + ' ' + self.rest
 
-q58()
+def all_sub_tree_raw_strs(raw_str):
+  raw_str = raw_str[1:-1] if re.match('^\(', raw_str) else raw_str
+  # 1. encounter first (, start recording, encounter pair ), stop recording and save to results
+  results = []
+  recording = False
+  record = ''
+  stack = 0
+  for index in range(0, len(raw_str)):
+    record += raw_str[index] if recording else ''
+    if raw_str[index] == '(':
+      if stack == 0:
+        recording = True
+        record = '('
+      stack += 1
+    elif raw_str[index] == ')':
+      stack -= 1
+      if stack == 0:
+        results.append(record)
+        recording = False
+        record = ''
+  return results
 
+def name_and_rest(raw_str):
+  raw_str = raw_str[1:-1] if re.match('^\(', raw_str) else raw_str
+  first_space = raw_str.index(' ')
+  return (raw_str[0:first_space], raw_str[first_space + 1:])
+
+
+def build_parse_tree(raw_str):
+    name, rest = name_and_rest(raw_str)
+    sub_strs = all_sub_tree_raw_strs(raw_str)
+    if len(sub_strs) < 1:
+      return Tree(name=name, is_terminal=True, val=rest, rest=rest)
+    else:
+      return Tree(name=name, is_terminal=False, trees=list(map(lambda x: build_parse_tree(x), sub_strs)), rest=rest)
+
+def all_NP_tree(tree: Tree):
+  result = []
+  if tree.name == 'NP':
+    result.append(tree)
+  for child in tree.trees:
+    result += all_NP_tree(child)
+  return result
+
+def q59():
+  # Iterate all nodes of the tree, if the node's name is "NP", iterate and sum up all vals of subnodes. 
+  for s in sentences_from_root(ET.parse(xml_path)):
+    root = build_parse_tree(s.find('parse').text) 
+    for tree in all_NP_tree(root):
+      print(tree.get_val())
+    print('---')
+
+q59()
