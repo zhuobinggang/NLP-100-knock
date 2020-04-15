@@ -4,7 +4,7 @@
 - [x] Chapter3 (Apr 8)
 - [x] Chapter4 (Apr 9)
 - [x] Chapter5 (Apr 12)
-- [ ] Chapter6
+- [X] Chapter6 (Apr 15)
 - [ ] Chapter7
 - [ ] Chapter8
 - [ ] Chapter9
