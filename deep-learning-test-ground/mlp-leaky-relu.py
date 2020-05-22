@@ -39,6 +39,28 @@ deriv_relu = np.vectorize(raw_deriv_relu)
 def get_cost(t, y):
     return (1 / (2 * len(t))) * np.sum(np.square(t - y))
 
+def once2(x, labels, w1, b1, w2, b2):
+    h = get_h(x, w1, b1) 
+    a = leaky_relu(h)
+    z = get_h(a, w2, b2)
+    t = labels
+    # # Backprop
+    dz = (z - t) / len(t)
+    db2 = dz.sum(axis=0)
+    dw2 = np.dot(dz.T, a)
+    # da = np.dot(dz * w2)
+    da = np.outer(dz, w2)
+    dh = da * derivative_leaky_relu(h)
+    db1 = dh.sum(axis=0)
+    dw1 = np.dot(dh.T, x)
+
+    # training
+    new_w1 = w1 - rate * dw1
+    new_b1 = b1 - rate * db1
+    new_w2 = w2 - rate * dw2
+    new_b2 = b2 - rate * db2
+    return (new_w1, new_b1, new_w2, new_b2)
+
 def once(x, labels, w1, b1, w2, b2):
     h = get_h(x, w1, b1) 
     a = leaky_relu(h)
@@ -79,7 +101,8 @@ reset_w_and_b()
 
 def run():
     global W1,W2,B1,B2
-    W1,B1,W2,B2 = once(inputs, labels, W1, B1, W2, B2)
+    # W1,B1,W2,B2 = once(inputs, labels, W1, B1, W2, B2)
+    W1,B1,W2,B2 = once2(inputs, labels, W1, B1, W2, B2)
 
 def output_loss(x, t):
     h = get_h(x, W1, B1) 
@@ -144,7 +167,7 @@ def run1000_and_draw():
         x.append(i+1)
         y.append(output_loss(inputs, labels))
     plt.plot(x, y)
-    plt.title('Hidden Units: ' + str(hidden_units) + ' Learning rate: ' + str(rate))
+    plt.title('Act: Leaky-Relu Hidden Units: ' + str(hidden_units) + ' Learning rate: ' + str(rate))
     plt.show()
 
 
