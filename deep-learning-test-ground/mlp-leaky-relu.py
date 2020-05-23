@@ -8,8 +8,8 @@ samples = np.array([[0,0,0],[0,1,1],[1,0,1],[1,1,0]])
 inputs = samples[:, 0:2]
 labels = samples[:, 2]
 
-rate = 0.5
-hidden_units = 4
+rate = 0.01
+hidden_units = 2
 W1 = -1
 B1 = -1
 W2 = -1
@@ -39,37 +39,18 @@ deriv_relu = np.vectorize(raw_deriv_relu)
 def get_cost(t, y):
     return (1 / (2 * len(t))) * np.sum(np.square(t - y))
 
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
 def once2(x, labels, w1, b1, w2, b2):
     h = get_h(x, w1, b1) 
     a = leaky_relu(h)
     z = get_h(a, w2, b2)
-    t = labels
-    # # Backprop
-    dz = (z - t) / len(t)
-    db2 = dz.sum(axis=0)
-    dw2 = np.dot(dz.T, a)
-    # da = np.dot(dz * w2)
-    da = np.outer(dz, w2)
-    dh = da * derivative_leaky_relu(h)
-    db1 = dh.sum(axis=0)
-    dw1 = np.dot(dh.T, x)
-
-    # training
-    new_w1 = w1 - rate * dw1
-    new_b1 = b1 - rate * db1
-    new_w2 = w2 - rate * dw2
-    new_b2 = b2 - rate * db2
-    return (new_w1, new_b1, new_w2, new_b2)
-
-def once(x, labels, w1, b1, w2, b2):
-    h = get_h(x, w1, b1) 
-    a = leaky_relu(h)
-    z = get_h(a, w2, b2)
-    y = leaky_relu(z)
+    y = sigmoid(z)
     t = labels
     # # Backprop
     dy = (y - t) / len(t)
-    dz = dy * derivative_leaky_relu(z) 
+    dz = dy* (y * (1- y))
     db2 = dz.sum(axis=0)
     dw2 = np.dot(dz.T, a)
     # da = np.dot(dz * w2)
@@ -84,6 +65,30 @@ def once(x, labels, w1, b1, w2, b2):
     new_w2 = w2 - rate * dw2
     new_b2 = b2 - rate * db2
     return (new_w1, new_b1, new_w2, new_b2)
+
+# def once(x, labels, w1, b1, w2, b2):
+#     h = get_h(x, w1, b1) 
+#     a = leaky_relu(h)
+#     z = get_h(a, w2, b2)
+#     y = leaky_relu(z)
+#     t = labels
+#     # # Backprop
+#     dy = (y - t) / len(t)
+#     dz = dy * derivative_leaky_relu(z) 
+#     db2 = dz.sum(axis=0)
+#     dw2 = np.dot(dz.T, a)
+#     # da = np.dot(dz * w2)
+#     da = np.outer(dz, w2)
+#     dh = da * derivative_leaky_relu(h)
+#     db1 = dh.sum(axis=0)
+#     dw1 = np.dot(dh.T, x)
+# 
+#     # training
+#     new_w1 = w1 - rate * dw1
+#     new_b1 = b1 - rate * db1
+#     new_w2 = w2 - rate * dw2
+#     new_b2 = b2 - rate * db2
+#     return (new_w1, new_b1, new_w2, new_b2)
 
 def reset_w_and_b():
   global W1,W2,B1,B2
@@ -108,7 +113,7 @@ def output_loss(x, t):
     h = get_h(x, W1, B1) 
     a = relu(h)
     z = get_h(a, W2, B2)
-    y = relu(z)
+    y = sigmoid(z)
     t = labels
     # Loss = 1/2 * np.square(t - y)
     Cost = 1 / (2 * len(t)) * np.sum(np.square(t - y))
@@ -116,15 +121,16 @@ def output_loss(x, t):
 
 
 def compare():
-  for index,x in enumerate(inputs):
+    x = inputs
     h = get_h(x, W1, B1) 
     a = relu(h)
     z = get_h(a, W2, B2)
-    y = relu(z)
-    t = labels[index]
-    print('z, t: ' + str(z[0]) + ', ' + str(t))
-    Loss = 1/2 * np.square(t - y)
-    print('Loss: ' + str(Loss))
+    y = sigmoid(z)
+    t = labels
+    print('y: ')
+    print(y)
+    print('t: ')
+    print(t)
 
 
 def output_dw():
@@ -162,9 +168,10 @@ def run1000_and_draw():
     x = [0]
     y = []
     y.append(output_loss(inputs, labels))
-    for i in range(1000):
-        run()
-        x.append(i+1)
+    for i in range(500):
+        for j in range(8):
+          run()
+        x.append(i*8)
         y.append(output_loss(inputs, labels))
     plt.plot(x, y)
     plt.title('Act: Leaky-Relu Hidden Units: ' + str(hidden_units) + ' Learning rate: ' + str(rate))
