@@ -4,4 +4,4 @@ __pycache__
 *\.output
 *\.input
 *\.png
-.swp
+/**/.swp
