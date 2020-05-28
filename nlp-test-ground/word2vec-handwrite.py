@@ -1,6 +1,10 @@
 import re
 import nltk
 import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+
 
 # Input: medium_text.txt
 input_file = 'medium_text.txt'
@@ -56,7 +60,7 @@ def set_one_hot_vecs():
         stem_infos[word]['onehot'] = onehot
 
 # create w1
-hidden_units = 2
+hidden_units = 10
 w1 = None
 # create w2
 w2 = None
@@ -144,5 +148,17 @@ def run():
     set_one_hot_vecs()
     reset_w1_w2()
 
+w1_2d = None
+
 def plot():
-    pass
+    global w1_2d
+    labels = list(stem_infos.keys())
+    pca = PCA(n_components=2)
+    w1_2d = pca.fit_transform(w1.T)
+    x,y = (w1_2d[:, 0],w1_2d[:, 1])
+    plt.scatter(x, y)
+    for i in range(0,len(labels)):
+        plt.annotate(labels[i], (x[i], y[i]))
+    plt.show()
+
+
