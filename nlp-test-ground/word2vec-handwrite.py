@@ -142,23 +142,26 @@ def find_nearest(word):
                 nearest = key
     return nearest
 
-def run():
+def init():
     init_stems()
     init_stem_infos()
     set_one_hot_vecs()
     reset_w1_w2()
 
-w1_2d = None
 
 def plot():
     global w1_2d
+    need_to_annotate = ['sun', 'earth', 'moon', 'coal', 'open', 'run', 
+            'exploit', 'energy', 'distanc', 'look', 'star', 'said', 
+            'wet', 'world', 'ship', 'support', 'think']
     labels = list(stem_infos.keys())
     pca = PCA(n_components=2)
     w1_2d = pca.fit_transform(w1.T)
     x,y = (w1_2d[:, 0],w1_2d[:, 1])
     plt.scatter(x, y)
     for i in range(0,len(labels)):
-        plt.annotate(labels[i], (x[i], y[i]))
+        if labels[i] in need_to_annotate:
+            plt.annotate(labels[i], (x[i], y[i]))
     plt.show()
 
 
