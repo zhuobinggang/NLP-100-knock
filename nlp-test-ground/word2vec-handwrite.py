@@ -11,7 +11,7 @@ input_file = 'medium_text.txt'
 # input_file = 'test.txt'
 high_freq_non_sense_words = ['at', 'onli', 'is', 'on', 'but', 'hi',  'for', 'that', 'be', 'in', 'wa', 'it', 'a', 'to', 'and', 'of', 'the']
 
-rate = 0.3
+rate = 0.1
 
 # Read file
 stems = None
@@ -71,38 +71,80 @@ def reset_w1_w2():
     # create w2
     w2 = np.random.rand(uniq_words_len, hidden_units)
 
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def set_stem_info_probs():
+    global stem_infos
+    keys = stem_infos.keys()
+    times = []
+    for key in keys:
+         times.append(stem_infos[key]['time']) 
+    times = np.array(times)
+    times = np.power(times, 0.75)
+    sumup = np.sum(times)
+    probs = times / sumup
+    for index, key in enumerate(keys):
+         stem_infos[key]['prob'] = probs[index] 
+
+
+def random_stems_by_probs():
+    keys = list(stem_infos.keys())
+    probs = list(map(lambda key: stem_infos[key]['prob'], keys))
+    return np.random.choice(keys, 6, p=probs)
+
+
+def random_uks():
+    selected_stems = random_stems_by_probs()
+    onehots = np.array(list(map(lambda stem: stem_infos[stem]['onehot'], selected_stems)))
+    uks = np.dot(onehots, w2)
+    return (onehots,uks)
+
+
 # centre, target are one-hot vectors
 def once(centre, target):
     global w1, w2
-    h = np.dot(w1, centre)
-    z = np.dot(w2, h)
-    exp_z = np.exp(z)
-    exp_sum = np.sum(exp_z)
+    # z = np.dot(w2, h)
     # # Loss
     # exp_target = np.sum(exp_z * target) # consider target only
     # loss = - np.log(exp_target / exp_sum)
     # print('Before loss: ' + str(loss))
+    # Negative Sampling
+    vc = np.dot(w1, centre)
+    uo = np.dot(target, w2)
+    onehots, uk = random_uks()
+    y = sigmoid(np.dot(vc, uo))
+    yk = sigmoid(-np.dot(uk, vc))
+    # loss = - np.log(y) - np.sum(np.log(yk))
+    # print(loss)
 
     # Backprop
-    # Set all y = 0 excepting target one
-    # y = (exp_z * target) / exp_sum
-    y = exp_z / exp_sum
-    dz = y - target
-    dw2 = np.outer(dz, h)
-    dh = np.dot(w2.T, dz)
-    dw1 = np.outer(dh, centre)
-    w2 -= rate * dw2
-    w1 -= rate * dw1
+    duo = (y - 1) * vc
+    duk = np.outer((1 - yk), vc)
+    dvc = (y - 1) * uo + np.dot(uk.T, (1 - yk)).sum(axis=0)
 
-    # # Recalculate Loss and show
-    # h = np.dot(w1, centre)
-    # z = np.dot(w2, h)
-    # exp_z = np.exp(z)
-    # exp_sum = np.sum(exp_z)
-    # # Loss
-    # exp_target = np.sum(exp_z * target) # consider target only
-    # loss = - np.log(exp_target / exp_sum)
-    # print('After loss: ' + str(loss))
+    # # Varify
+    # print('---')
+    # print(np.dot(vc, uo))
+    # uo -= rate * duo
+    # print(np.dot(vc, uo))
+    # print(np.dot(uk, vc))
+    # uk -= rate * duk
+    # print(np.dot(uk, vc))
+    # vc -= rate * dvc
+    # print('---')
+    # y = sigmoid(np.dot(vc, uo))
+    # yk = sigmoid(-np.dot(uk, vc))
+    # loss = - np.log(y) - np.sum(np.log(yk))
+    # print('after loss:' + str(loss))
+
+
+    rated_dw1 = np.outer(dvc * rate, centre)
+    w1 -= rated_dw1 
+    rated_dw2 = np.outer(target, duo * rate)
+    rated_dw2 += np.dot(onehots.T, duk * rate)
+    w2 -= rated_dw2
+
 
 def once_by_stem(centre, target):
     a = stem_infos[centre]['onehot']
@@ -146,6 +188,7 @@ def init():
     init_stems()
     init_stem_infos()
     set_one_hot_vecs()
+    set_stem_info_probs()
     reset_w1_w2()
 
 
@@ -163,5 +206,7 @@ def plot():
         if labels[i] in need_to_annotate:
             plt.annotate(labels[i], (x[i], y[i]))
     plt.show()
+
+
 
 
