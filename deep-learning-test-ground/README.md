@@ -16,3 +16,6 @@ Frictioness = 0.9
 ![](momentum_0point9.png)
 Frictioness = 0.5
 ![](momentum_0point5.png)
+
+Frictionness = 0.5 & Learing rate = 0.5(0.1 by default)
+![](momentum_0point5_rate0point5.png)
