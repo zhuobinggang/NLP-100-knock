@@ -8,4 +8,11 @@
 y: Accuracy
 x: Times of feeding a random sample
 
+### Before using SGD-with-momentum 
 ![](wheat.png)
+
+### Using SGD-with-momentum
+Frictioness = 0.9
+![](momentum_0point9.png)
+Frictioness = 0.5
+![](momentum_0point5.png)

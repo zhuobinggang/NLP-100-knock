@@ -9,15 +9,27 @@ B1 = -1
 W2 = -1 
 B2 = -1 
 rate = 0.1
+friction = 0.9
+pW1 = 0
+pW2 = 0
+pB1 = 0
+pB2 = 0
 units = 5
 class_num = 3
 
 def reset_w_b():
     global W1,B1,W2,B2
+    global pW1, pW2, pB1, pB2
     W1 = np.random.rand(units, 7)
     B1 = np.random.rand(units)
     W2 = np.random.rand(class_num, units) # 3 units ouptut layer with softmax
     B2 = np.random.rand(class_num)
+    pW1 = 0
+    pW2 = 0
+    pB1 = 0
+    pB2 = 0
+
+    
 
 def get_mins_and_maxs(m, lenth):
     mins = []
@@ -119,6 +131,7 @@ def softmax(z):
 
 def run(sample):
     global W1, W2, B1, B2
+    global pW1, pW2, pB1, pB2
     x = sample[0:-1]
     t = one_hot(sample[-1]) 
     # Feedforward
@@ -139,11 +152,22 @@ def run(sample):
     dh = da * relu_deriv(h)
     db1 = dh
     dw1 = np.outer(dh, x)
-    # update
-    W1 = W1 - (rate * dw1)
-    W2 = W2 - (rate * dw2)
-    B1 = B1 - (rate * db1)
-    B2 = B2 - (rate * db2)
+
+    # # update
+    # W1 = W1 - (rate * dw1)
+    # W2 = W2 - (rate * dw2)
+    # B1 = B1 - (rate * db1)
+    # B2 = B2 - (rate * db2)
+    # Momentum Update
+    pW1 = friction * pW1 - rate * dw1
+    W1 += pW1
+    pW2 = friction * pW2 - rate * dw2
+    W2 += pW2
+    pB2 = friction * pB2 - rate * db2
+    B2 += pB2
+    pB1 = friction * pB1 - rate * db1
+    B1 += pB1
+
 
     # print after loss
     # h = np.dot(W1, x) + B1
@@ -159,7 +183,7 @@ def run_1000_and_draw():
     x = []
     y = []
     count = 0
-    for epoch in range(10):
+    for epoch in range(5):
         np.random.shuffle(samples)
         for j in range(samples.shape[0]):
             if count % 40 == 0:
@@ -169,7 +193,7 @@ def run_1000_and_draw():
             run(samples[j])
             
     plt.plot(x, y)
-    plt.title('SGD, rate: {rate}, units: {units}'.format(rate=rate,units=units))
+    plt.title('SGD, rate: {rate}, momentum: {momentum}, units: {units}'.format(rate=rate,units=units, momentum=friction))
     plt.show()
 
 
