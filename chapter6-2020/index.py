@@ -1,42 +1,73 @@
-import re
-# import nltk
-# ps = nltk.stem.PorterStemmer()
+from torch.utils.data import  Dataset, DataLoader
+import torch
+import numpy as np
+import torch.nn as nn
 
-def formated_line(line):
-    cate, title = line.split('\t')
-    title = re.sub('[^A-Za-z 0-9]', ' ', title)
-    title = re.sub(' +', ' ', title)
-    title_words = list((map(lambda x: ps.stem(x.lower()), title.split(' '))))
-    title = ' '.join(title_words)
-    return f'{cate}\t{title}'
+def cate_to_number(cate):
+    the_map = {'e':0, 'b':1, 't':2, 'm':3}
+    return the_map[cate]
 
+# Prepare dataset
 
-# Read train file, stemerize, remove all special characters, lowercase, and write to new file
-def format_input():
-    # filename = 'head_train.txt'
-    # filename = 'train.txt'
-    # filename = 'test.txt'
-    filename = 'valid.txt'
-    with open(filename) as f:
-        lines = f.readlines()
-        for line in lines:
-            print(formated_line(line))
+class ReviewDataset(Dataset):
+    def __init__(self, filename):
+        xy = np.loadtxt(filename, delimiter=',', dtype=str)
+        ys = np.array(list(map(cate_to_number, xy[:,0]))).astype(np.long)
+        xs = np.array(xy[:,1:]).astype(np.float32)
+        xs = xs / 10000 # Normalize
+        
+        self.y_data = torch.from_numpy(ys)
+        self.x_data = torch.from_numpy(xs)
+        self.n_samples = xy.shape[0]
 
-# format_input()
+    def __getitem__(self, index):
+        return self.x_data[index], self.y_data[index]
 
-# for all words appeared in these files, format them and build a map
-def all_uniq_words():
-    all_words = []
-    for filename in ['train.formatted.txt', 'valid.formatted.txt', 'test.formatted.txt']:
-        with open(filename) as f:
-            for line in f.readlines():
-                cate, title = line.split('\t')
-                for word in title.split(' '):
-                    all_words.append(word)
-    return set(all_words)
+    def __len__(self):
+        return self.n_samples
 
-for word in all_uniq_words():
-    print(word)
+train_dataset = ReviewDataset('valid.feature.txt')
+train_loader = DataLoader(dataset=train_dataset, batch_size=4, num_workers=2)
+
+# Create Network
+class Network(nn.Module):
+    def __init__(self, input_size, hidden_size, num_classes):
+        super(Network, self).__init__()
+        self.input_size = input_size
+        self.l1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.l2 = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        out = self.l1(x)
+        out = self.relu(out)
+        out = self.l2(out)
+        return out
+
+model = Network(20, 50, 4)
+
+# features, label = dataset[0]
+
+# Loss and optimizer
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+
+softmax = nn.Softmax(dim = 1)
+
+# Training loop
+for epoch in range(60):
+    for _, (inputs, labels) in enumerate(train_loader):
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+    xs, ys = train_dataset[0:]
+    o = softmax(model(xs))
+    max_indices = o.max(axis=1).indices
+    wrong_count = np.count_nonzero((ys - max_indices).numpy())
+    acc = 100 - (wrong_count / train_dataset.n_samples) * 100
+    print(f'epoch: {epoch + 1}, acc: {acc}')
 
 
 
