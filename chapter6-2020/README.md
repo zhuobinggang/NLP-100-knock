@@ -26,3 +26,5 @@
 ## Result Example
 ![](confusion_matrix.png)
 
+# 適合率，再現率，F1スコアの計測Permalink
+![](q56.png)

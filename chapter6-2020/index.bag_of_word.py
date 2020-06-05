@@ -154,3 +154,52 @@ def get_test_confusion_matrix(dataset):
         res[predicted[i]][labels[i]] += 1
     return res.astype(np.int)
     
+def cal_precision_recall_f1score_of_cates(matrix):
+    if matrix.shape[0] != matrix.shape[1]:
+        print('Wrong matrix!')
+        return
+    precision = []
+    recall = []
+    for i in range(matrix.shape[0]):
+        tp = matrix[i][i]
+        fp_add_tp = np.sum(matrix[i])
+        precision.append(tp / fp_add_tp)
+        tp_add_fn = np.sum(matrix[:,i])
+        recall.append(tp/tp_add_fn)
+    f1score = []
+    for i in range(len(precision)):
+        p = precision[i]
+        r = recall[i]
+        f1score.append(2 / (1/p + 1/r))
+    return precision, recall, f1score
+
+def cal_micro_avg(matrix):
+    precision_avg = 0
+    sum_predicted = 0
+    sum_fact = 0
+    sum_true_predicted = 0
+    for i in range(matrix.shape[0]):
+        sum_predicted += np.sum(matrix[i])
+        sum_fact += np.sum(matrix[:, i])
+        sum_true_predicted += matrix[i, i]
+    micro_precision = sum_true_predicted / sum_predicted
+    micro_recall = sum_true_predicted / sum_fact
+    micro_f1 = 2 / (1/micro_precision + 1/micro_recall)
+    return micro_precision, micro_recall, micro_f1
+   
+def cal_macro_avg(matrix):
+    p, r, f = cal_precision_recall_f1score_of_cates(matrix)
+    return np.sum(p)/4, np.sum(r)/4, np.sum(f)/4
+
+def q56(m):
+    # dataset = ReviewDataset('test.formatted.txt')
+    # m = get_test_confusion_matrix(dataset)
+    p, r, f = cal_precision_recall_f1score_of_cates(matrix)
+    content = f"{'': >20}{'precision': >20}{'recall': >20}{'f1-score': >20}\n"
+    for i in range(len(p)):
+        content += f"{cate_index_catename(i): >20}{p[i]: >20}{r[i]: >20}{f[i]: >20}\n"
+    print(content)
+        
+
+
+
