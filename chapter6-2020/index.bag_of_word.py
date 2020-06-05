@@ -144,6 +144,13 @@ def print_out_confusion_matrix(m):
         content += f'{head: >25}{tail}\n'
     print(content)
 
+# dataset = ReviewDataset('test.formatted.txt')
 
-
-
+def get_test_confusion_matrix(dataset):
+    labels, xs = dataset[0:]
+    predicted = softmax(model(xs)).max(axis=1).indices
+    res = np.zeros(16).reshape(4,4)
+    for i in range(len(labels)):
+        res[predicted[i]][labels[i]] += 1
+    return res.astype(np.int)
+    

@@ -4,6 +4,6 @@
   - [X] Generate uniq word file for creating word-index map
   - [X] Parsing title into BOW vector when initing Dataset 
 
-- [ ] 55. 混同行列の作成
-  - [ ] Writing algorithm to print matrix
-  - [ ] Figuring out all cells in the matrix
+- [X] 55. 混同行列の作成
+  - [X] Writing algorithm to print matrix
+  - [X] Figuring out all cells in the matrix

@@ -1,11 +1,28 @@
 
-## Usage
+# Prepare Model & Run Test
+
+## Train Model
 1. `python3 -i index.bag_of_word.py`
 2. `init_dataset_and_loader()`
 3. `init_model_loss_optim()`
 4. `run_by_epochs(10)`
 5. `run_test()`
 
+## Use Trained Model
+1. `python3 -i index.bag_of_word.py`
+2. `load_saved_model()`
+5. `run_test()`
 
-# Result
+## Test Result Example
 ![](result.png)
+
+# 混同行列の作成(No.55)
+1. `python3 -i index.bag_of_word.py`
+2. `load_saved_model()`
+3. `dataset = ReviewDataset('test.formatted.txt')`
+4. `m = get_test_confusion_matrix(dataset)`
+5. `print_out_confusion_matrix(m)`
+
+## Result Example
+![](confusion_matrix.png)
+
