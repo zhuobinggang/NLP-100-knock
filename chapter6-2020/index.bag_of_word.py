@@ -4,9 +4,20 @@ import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 
+train_dataset = None
+train_loader = None
+model = None
+criterion = None
+optimizer = None
+softmax = nn.Softmax(dim = 1)
+
 def cate_to_number(cate):
     the_map = {'e':0, 'b':1, 't':2, 'm':3}
     return the_map[cate]
+
+def cate_index_catename(index):
+    the_map = {0: 'entertainment', 1: 'finance', 2: 'technology', 3: 'health'}
+    return the_map[index]
 
 def words_to_bag(word_index_map, words, dim=2000):
     res = np.zeros(dim)
@@ -52,8 +63,6 @@ class ReviewDataset(Dataset):
     def  __len__(self):
         return self.length
 
-train_dataset = None
-train_loader = None
 
 def init_dataset_and_loader():
     global train_dataset, train_loader
@@ -76,9 +85,6 @@ class Network(nn.Module):
         out = self.layer2(out)
         return out
 
-model = None
-criterion = None
-optimizer = None
 
 def init_model_loss_optim():
     global model, criterion, optimizer
@@ -86,8 +92,6 @@ def init_model_loss_optim():
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.05, momentum=0.9)
 
-
-softmax = nn.Softmax(dim = 1)
 
 def run_by_epochs(epochs = 10):
     # Train loop
@@ -106,15 +110,40 @@ def run_by_epochs(epochs = 10):
         acc = 100 - (wrong_count / train_dataset.length) * 100
         print(f'epoch: {epoch + 1}, acc: {acc}')
 
-def run_test():
-    test_dataset = ReviewDataset('test.formatted.txt')
-    ys, xs = test_dataset[0:]
+def load_saved_model():
+    global model
+    model = Network(2000)
+    model.load_state_dict(torch.load('model.pt'))
+    model.eval()
+
+def cal_accuracy_by_dataset(dataset):
+    ys, xs = dataset[0:]
     o = softmax(model(xs))
     max_indices = o.max(axis=1).indices
     wrong_count = np.count_nonzero((ys - max_indices).numpy())
-    acc = 100 - (wrong_count / train_dataset.length) * 100
+    acc = 100 - (wrong_count / dataset.length) * 100
+    return acc
+
+def run_test():
+    test_dataset = ReviewDataset('test.formatted.txt')
+    acc = cal_accuracy_by_dataset(test_dataset)
     print('++++++++++++')
     print(f'Test Acc: {acc}')
-    
+
+def run_valid():
+    valid_dataset = ReviewDataset('valid.formatted.txt')
+    acc = cal_accuracy_by_dataset(valid_dataset)
+    print('++++++++++++')
+    print(f'Valid Acc: {acc}')
+
+def print_out_confusion_matrix(m):
+    content = f'{"": >25}{cate_index_catename(0): >20}{cate_index_catename(1): >20}{cate_index_catename(2): >20}{cate_index_catename(3): >20}\n'
+    for i in range(len(m)):
+        head = f'{cate_index_catename(i)}(expected)'
+        tail = ''.join(list(map(lambda x: f'{x: >20}', m[i])))
+        content += f'{head: >25}{tail}\n'
+    print(content)
+
+
 
 
