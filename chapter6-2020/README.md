@@ -32,4 +32,12 @@
 # 特徴量の重みの確認
 ![](q57.png)
 
+# 正則化パラメータの変更
+## Usage
+1. `python3 -i index.bag_of_word.py`
+2. `matrix, decays = get_acc_matrix_on_different_regula_param()`
+3. `plot_acc_vs_regul_param(matrix, decays)`
 
+
+## Result
+![](q58.png)

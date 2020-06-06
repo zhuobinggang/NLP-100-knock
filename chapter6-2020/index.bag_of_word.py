@@ -3,6 +3,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
+import matplotlib.pyplot as plt
 
 train_dataset = None
 train_loader = None
@@ -86,11 +87,11 @@ class Network(nn.Module):
         return out
 
 
-def init_model_loss_optim():
+def init_model_loss_optim(decay=0):
     global model, criterion, optimizer
     model = Network(2000)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.05, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=0.05, momentum=0.9, weight_decay=decay)
 
 
 def run_by_epochs(epochs = 10):
@@ -221,6 +222,36 @@ def get_most_heavy_weights(words = None):
     return [words[i] for i in indices[0: 20]]
     
 
+def get_acc_matrix_on_different_regula_param(decays):
+    # init datasets
+    init_dataset_and_loader()
+    test_dataset = ReviewDataset('test.formatted.txt')
+    valid_dataset = ReviewDataset('valid.formatted.txt')
+
+    if decays is None:
+        decays = [0.05, 0.01, 0.001, 0.0001] 
+
+    # for each decay rate in [0.05, 0.01, 0.001, 0.0001]
+    res = []
+    for decay in decays:
+        init_model_loss_optim(decay)
+        run_by_epochs(5)
+        res.append([cal_accuracy_by_dataset(train_dataset),
+            cal_accuracy_by_dataset(test_dataset),
+            cal_accuracy_by_dataset(valid_dataset)])
+    return np.array(res), decays
 
 
+def plot_acc_vs_regul_param(matrix, xlabels):
+    # matrix = np.array([[92.3, 87.3, 77.3],[92.3, 87.3, 77.3], [92.3, 87.3, 77.3], [92.3, 87.3, 77.3], [92.3, 87.3, 77.3]])
+    # matrix = np.array([[92.3, 87.3, 77.3, 80, 80],[92.3, 87.3, 77.3, 80, 80], [92.3, 87.3, 77.3, 80, 80], [92.3, 87.3, 77.3, 80, 80], [92.3, 87.3, 77.3, 80, 80]])
+    # xlabels = np.array(['10', '1', '0.1', '0.01', '0.001'])
+    xs = np.array(range(len(xlabels)))
+    plt.xticks(xs, xlabels)
+    width = 1/5
+    plt.bar(xs - (width * 1), matrix[:,0], width = width, label=xlabels[0])
+    plt.bar(xs, matrix[:,1], width = width, label=xlabels[1])
+    plt.bar(xs + (width * 1), matrix[:,2], width = width, label=xlabels[2])
+    plt.legend()
+    plt.show()
 
