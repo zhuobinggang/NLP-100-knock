@@ -13,3 +13,8 @@
   - [X] Calculate Precision, Recall, F1 Score for every category
   - [X] Understanding マイクロ平均（micro-average）とマクロ平均（macro-average）(17:27)
 
+- [X] 57. 特徴量の重みの確認
+  - [X] How to evaluate weights?
+
+- [ ] 58.正則化パラメータの変更
+  - [ ] 测试手写loss能实现正规化

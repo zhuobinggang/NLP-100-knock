@@ -201,5 +201,26 @@ def q56(m):
     print(content)
         
 
+def high_frequency_words():
+    with open('high_frequency_words.csv') as f:
+        lines = f.read().strip().split('\n')
+        word_count_pairs = list(map(lambda line: line.strip().split(','), lines))
+        return word_count_pairs
+
+
+def get_most_heavy_weights(words = None):
+    if model is None:
+        return
+    if words is None:
+        words = high_frequency_words()
+    w = next(model.layer1.parameters()).clone().detach()
+    feature_weight_sums = torch.sum(w, axis=0)
+    weight_index_pairs = [(x,i) for i,x in enumerate(feature_weight_sums)]
+    weight_index_pairs = list(reversed(sorted(weight_index_pairs, key = lambda p: p[0])))
+    indices = list(map(lambda x: x[1] ,weight_index_pairs))
+    return [words[i] for i in indices[0: 20]]
+    
+
+
 
 

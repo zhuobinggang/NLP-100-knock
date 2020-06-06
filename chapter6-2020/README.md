@@ -26,5 +26,10 @@
 ## Result Example
 ![](confusion_matrix.png)
 
-# 適合率，再現率，F1スコアの計測Permalink
+# 適合率，再現率，F1スコアの計測
 ![](q56.png)
+
+# 特徴量の重みの確認
+![](q57.png)
+
+
