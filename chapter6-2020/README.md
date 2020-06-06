@@ -40,4 +40,7 @@
 
 
 ## Result
+
+yaxis: accuracy, xaxis: rate of weight decay, 3 columns every bar: train/test/valid
+
 ![](q58.png)
