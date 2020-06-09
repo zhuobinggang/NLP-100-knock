@@ -28,3 +28,21 @@ This will take more than 1 hour to process.
 
 
 ## No.66
+
+Result: 0.7000217838950313
+
+1. `preprocess_q66()`
+2. `r = q66()`
+
+## No.67
+
+Just call `q67()` to get contry label pairs, something like this:
+
+![](q67.png)
+
+## No.68
+
+
+
+
+
