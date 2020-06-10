@@ -10,8 +10,8 @@
 
 Chapter1 -> Chapter5, the same as version 2015
 
-- [X] Chapter6 (June 7)
-- [ ] Chapter7
+- [X] Chapter6 (June 7)  https://github.com/zhuobinggang/NLP-100-knock/tree/master/chapter6-2020
+- [X] Chapter7 (June 10) https://github.com/zhuobinggang/NLP-100-knock/tree/master/chapter7-2020
 - [ ] Chapter8
 - [ ] Chapter9
 - [ ] Chapter10
