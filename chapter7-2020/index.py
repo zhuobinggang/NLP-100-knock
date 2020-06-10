@@ -2,6 +2,13 @@ from gensim.models.keyedvectors import KeyedVectors
 from sklearn.cluster import KMeans
 import numpy as np
 
+# For plotint dendrogram Start
+from matplotlib import pyplot as plt
+from scipy.cluster.hierarchy import dendrogram
+from sklearn.cluster import AgglomerativeClustering
+# For plotint dendrogram End
+
+
 model = None
 
 def init_model():
@@ -145,12 +152,26 @@ def q67():
     return contry_label_pairs
 
 
+def plot_dendrogram(model, **kwargs):
+    # Children of hierarchical clustering
+    children = model.children_
+    # Distances between each pair of children
+    # Since we don't have this information, we can use a uniform one for plotting
+    distance = np.arange(children.shape[0])
+    # The number of observations contained in each cluster level
+    no_of_observations = np.arange(2, children.shape[0]+2)
+    # Create linkage matrix and then plot the dendrogram
+    linkage_matrix = np.column_stack([children, distance, no_of_observations]).astype(float)
+    # Plot the corresponding dendrogram
+    dendrogram(linkage_matrix, **kwargs)
 
-
-
-
-
-
-
+def q68():
+    cs = get_unique_contries()
+    vectors = [model.get_vector(c) for c in cs]
+    dendro = AgglomerativeClustering(n_clusters=5)
+    dendro = dendro.fit(vectors)
+    plt.title('Hierarchical Clustering Dendrogram')
+    plot_dendrogram(dendro, labels=cs)
+    plt.show()
 
 

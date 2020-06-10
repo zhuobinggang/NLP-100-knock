@@ -10,7 +10,7 @@
 
 Chapter1 -> Chapter5, the same as version 2015
 
-- [ ] Chapter6
+- [X] Chapter6 (June 7)
 - [ ] Chapter7
 - [ ] Chapter8
 - [ ] Chapter9

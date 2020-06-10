@@ -42,7 +42,10 @@ Just call `q67()` to get contry label pairs, something like this:
 
 ## No.68
 
+Just call `q68()`
 
+![](q68_1.png)
+![](q68_2.png)
 
 
 
