@@ -1,5 +1,6 @@
 from gensim.models.keyedvectors import KeyedVectors
 from sklearn.cluster import KMeans
+from sklearn.manifold import TSNE
 import numpy as np
 
 # For plotint dendrogram Start
@@ -142,6 +143,8 @@ def get_unique_contries():
 
 
 def q67():
+    if model is None:
+        init_model()
     cs = get_unique_contries()
     vectors = [model.get_vector(c) for c in cs]
     kmeans = KMeans(n_clusters=5, n_init=3).fit(vectors)
@@ -166,6 +169,8 @@ def plot_dendrogram(model, **kwargs):
     dendrogram(linkage_matrix, **kwargs)
 
 def q68():
+    if model is None:
+        init_model()
     cs = get_unique_contries()
     vectors = [model.get_vector(c) for c in cs]
     dendro = AgglomerativeClustering(n_clusters=5)
@@ -173,5 +178,22 @@ def q68():
     plt.title('Hierarchical Clustering Dendrogram')
     plot_dendrogram(dendro, labels=cs)
     plt.show()
+
+
+def q69():
+    if model is None:
+        init_model()
+    cs = get_unique_contries()
+    vectors = [model.get_vector(c) for c in cs]
+    # Dimension reduction
+    vec_2d = TSNE(n_components=2).fit_transform(vectors)
+    x = vec_2d[:,0]
+    y = vec_2d[:,1]
+    plt.scatter(x, y)
+    for i,txt in enumerate(cs):
+        plt.annotate(txt, (x[i], y[i]))
+    plt.show()
+    
+
 
 

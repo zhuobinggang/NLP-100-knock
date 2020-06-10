@@ -48,4 +48,9 @@ Just call `q68()`
 ![](q68_2.png)
 
 
+## No.69
 
+Just call `q69()`
+
+![](q69_1.png)
+![](q69_2.png)
