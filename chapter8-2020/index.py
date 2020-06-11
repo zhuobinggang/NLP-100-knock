@@ -76,6 +76,23 @@ def cate_to_number(cate):
     return the_map[cate]
 
 
+# Construct Network
+class Net2(nn.Module):
+    def __init__(self):
+        super(Net2, self).__init__()
+        self.l1 = nn.Linear(300, 10)
+        self.relu = nn.ReLU()
+        self.l2 = nn.Linear(10, 4)
+    def forward(self, x):
+        out = self.l1(x)
+        out = self.relu(out)
+        out = self.l2(out)
+        return out
+
+def cate_to_number(cate):
+    the_map = {'e':0, 'b':1, 't':2, 'm':3}
+    return the_map[cate]
+
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, filename = 'train.feature.txt'):
         super(Dataset).__init__()
@@ -106,6 +123,16 @@ softmax = nn.Softmax(dim = 1)
 def init_dnn_components():
     global train_dataset, test_dataset, data_loader, criterion, optimizer, model
     model = Net()
+    train_dataset = Dataset('train.feature.txt')
+    # Prepare the test.feature.txt
+    test_dataset = Dataset('test.feature.txt')
+    data_loader = DataLoader(train_dataset, batch_size=4)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+
+def init_dnn_components_300_10_relu_4():
+    global train_dataset, test_dataset, data_loader, criterion, optimizer, model
+    model = Net2()
     train_dataset = Dataset('train.feature.txt')
     # Prepare the test.feature.txt
     test_dataset = Dataset('test.feature.txt')
@@ -159,6 +186,7 @@ def run_by_epochs(epochs):
         test_accuracy.append(get_accuracy(test_dataset))
         train_loss.append(get_loss(train_dataset))
         test_loss.append(get_loss(test_dataset))
+        print(f'Epoch {epoch + 1} over')
     # Draw them by plt
     return list(range(1, epochs + 1)), train_loss, train_accuracy, test_loss, test_accuracy
 
