@@ -1,4 +1,5 @@
 import numpy as np
+from gensim.models.keyedvectors import KeyedVectors
 
 word_index_map = None
 word_cnt_pairs = None
@@ -48,7 +49,33 @@ def cate_to_number(cate):
     the_map = {'e':0, 'b':1, 't':2, 'm':3}
     return the_map[cate]
 
-def get_samples():
+vec300 = None
+
+def init_vec300():
+    global vec300
+    print('Loading trained vec300...')
+    vec300 = KeyedVectors.load_word2vec_format('../chapter7-2020/GoogleNews-vectors-negative300.bin', binary=True)
+    print('Vec300 is ready.')
+
+
+def word2vec(word):
+    # if word not in the whole model then return None
+    try:
+        vec = vec300.get_vector(word)
+        return vec
+    except KeyError as e:
+        print(f'{word} not in vec300')
+        return None
+
+
+def words_to_vecs(words):
+    if vec300 is None:
+        init_vec300()
+    res = [word2vec(word) for word in words]
+    res = list(filter(lambda x: x is not None, res))
+    return res
+
+def get_samples_onehot():
     res = []
     with open('train.processed.txt') as f:
         for line in f:
@@ -56,20 +83,16 @@ def get_samples():
             words = title.split(',')
             onehots = [[x] for x in ids2onehot(words2ids(words))]
             res.append((cate_to_number(cate), onehots))
-    # word1 = np.zeros(2000)
-    # word1[1000] = 1
-    # word2 = np.zeros(2000)
-    # word2[100] = 1
-    # words = [[word1], [word2]] # (seq_size, batch_size, input_size)
-    # label = 1
-    # res.append((label, words))
     return res
 
-
-
-
-
-
-
-
+def get_samples():
+    res = []
+    with open('train.processed.txt') as f:
+        for line in f:
+            cate, title = line.strip().split(' ')
+            words = title.split(',')
+            # onehots = [[x] for x in ids2onehot(words2ids(words))]
+            vecs = [[x] for x in words_to_vecs(words)]
+            res.append((cate_to_number(cate), vecs))
+    return res
 
