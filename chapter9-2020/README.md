@@ -25,3 +25,14 @@ result:
 result:
 
 ![](85.png)
+
+
+## 86 -> 89
+
+1. `init_cnn_model()`
+2. `run_by_epochs(3)`
+
+result:
+
+![](89.png)
+

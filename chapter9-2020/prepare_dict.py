@@ -96,3 +96,27 @@ def get_samples():
             res.append((cate_to_number(cate), vecs))
     return res
 
+def limit_length(vecs, new_len=15):
+    if len(vecs) > new_len:
+        return vecs[:15]
+    else:
+        for _ in range(new_len - len(vecs)):
+            vecs.append(np.zeros(300))
+    return vecs
+
+def get_samples_CNN():
+    res = []
+    with open('train.processed.txt') as f:
+        for line in f:
+            cate, title = line.strip().split(' ')
+            words = title.split(',')
+            # onehots = [[x] for x in ids2onehot(words2ids(words))]
+            vecs = words_to_vecs(words)
+            vecs = limit_length(vecs, 15)
+            vecs = np.array(vecs, dtype=np.float32)
+            vecs = vecs.T # (300, 15)
+            res.append((cate_to_number(cate), vecs))
+    return res
+
+
+

@@ -1,7 +1,6 @@
 import prepare_dict as pd
 import torch
 import torch.nn as nn
-import torch.optim as optim
 
 
 class Net(nn.Module):
@@ -26,11 +25,28 @@ class BiNet(nn.Module):
         return o
 
 
+class CNN(nn.Module):
+    def __init__(self):
+        super(CNN, self).__init__()
+        self.filter = nn.Conv1d(300, 1, 3, padding=1) # output => (N, 1, 15)
+        self.pool = nn.MaxPool1d(3) # output => (N, 1, 5)
+        self.output = nn.Linear(5, 4) # output => (N, 1, 4)
+    def forward(self, x): # x => (N, 300, 15)
+        x = x.reshape(1, 300, 15)
+        x = self.filter(x)
+        x = self.pool(x)
+        x = self.output(x)
+        x = x.reshape(-1,4) # (N, 4)
+        return x 
+
+
+
 def preprocess_samples(raw_samples):
     res = []
     for cate, words in raw_samples:
         res.append((cate, torch.tensor(words, dtype=torch.float32)))
     return res
+
 
 samples = None
 loss = nn.CrossEntropyLoss()
@@ -41,22 +57,26 @@ def init_samples_model_onehot():
     global samples, model, optim
     samples = preprocess_samples(pd.get_samples_onehot())
     model = Net()
-    optim = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    optim = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
 
 def init_samples_model_vec300():
     global samples, model, optim
     samples = preprocess_samples(pd.get_samples())
     model = Net(300, 50, 4)
-    optim = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    optim = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
 def init_binet_model():
     global samples, model, optim
     samples = preprocess_samples(pd.get_samples())
     model = BiNet(300, 50, 4)
-    optim = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    optim = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
-
+def init_cnn_model():
+    global samples, model, optim
+    samples = preprocess_samples(pd.get_samples_CNN())
+    model = CNN()
+    optim = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
 def get_acc():
     # output acc
